@@ -7,8 +7,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.snackbar.Snackbar
 
 private const val TAG = "MainActivity"
 
@@ -18,24 +18,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nextButton: ImageButton
     private lateinit var prevButton: ImageButton
     private lateinit var questionTextView: TextView
-    private val questionBank = listOf(
-        Question(R.string.question_australia, true),
-        Question(R.string.question_oceans, true),
-        Question(R.string.question_mideast, false),
-        Question(R.string.question_africa, false),
-        Question(R.string.question_americas, true),
-        Question(R.string.question_asia, true))
-    private var currentIndex = 0
 
     private var answered = false
     private var correctAnswersCount = 0
 
-
+    private val quizViewModel: QuizViewModel by lazy {
+        ViewModelProviders.of(this).get(QuizViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate(Bundle?) called")
         setContentView(R.layout.activity_main)
+
         trueButton = findViewById(R.id.true_button)
         falseButton = findViewById(R.id.false_button)
         nextButton = findViewById(R.id.next_button)
@@ -56,11 +51,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
         nextButton.setOnClickListener {
-            currentIndex = (currentIndex + 1) % questionBank.size
+            quizViewModel.moveToNext()
             updateQuestion()
+            if(quizViewModel.equalCurQB){
+                nextButton.isEnabled = false
+                nextButton.visibility = View.INVISIBLE
+            }
         }
         prevButton.setOnClickListener {
-            currentIndex = (currentIndex - 1 + questionBank.size) % questionBank.size
+            quizViewModel.moveToBack()
             updateQuestion()
         }
 
@@ -88,24 +87,25 @@ class MainActivity : AppCompatActivity() {
     }
     private fun updateQuestion() {
         enableAnswerButtons()
-        if (currentIndex < questionBank.size) {
-            val questionTextResId = questionBank[currentIndex].textResId
+        if (quizViewModel.diffBetweenCurQB ) {
+            val questionTextResId = quizViewModel.currentQuestionText
             questionTextView.setText(questionTextResId)
         } else {
             showFinalScore()
         }
     }
     private fun checkAnswer(userAnswer: Boolean) {
-        val correctAnswer = questionBank[currentIndex].answer
+        val correctAnswer = quizViewModel.currentQuestionAnswer
         val messageResId = if (userAnswer == correctAnswer) {
             correctAnswersCount++
-            R.string.correct_toast
+            getString(R.string.correct_toast)
         }
         else {
-            R.string.incorrect_toast
+            getString(R.string.incorrect_toast)
         }
-        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show()
-        if (currentIndex == questionBank.size - 1) {
+        Snackbar.make(findViewById(android.R.id.content), messageResId, Snackbar.LENGTH_SHORT).show()
+
+        if (quizViewModel.equalCurQB) {
             showFinalScore()
         }
     }
@@ -117,22 +117,15 @@ class MainActivity : AppCompatActivity() {
     private fun enableAnswerButtons() {
         trueButton.isEnabled = true
         falseButton.isEnabled = true
-        answered = false
+
     }
     private fun showFinalScore() {
-        val totalQuestions = questionBank.size
+        val totalQuestions = quizViewModel.questionBankSize
         val percentage = (correctAnswersCount.toDouble() / totalQuestions.toDouble()) * 100
 
         val message = "Вы ответили правильно на $correctAnswersCount из $totalQuestions вопросов. Ваша оценка: %.2f%%".format(percentage)
 
-        // Используем AlertDialog для отображения уведомления
-        val alertDialogBuilder = AlertDialog.Builder(this)
-        alertDialogBuilder.setTitle("Результат")
-        alertDialogBuilder.setMessage(message)
-        alertDialogBuilder.setPositiveButton("OK") { dialog, _ ->
-            dialog.dismiss()
-        }
-        val alertDialog = alertDialogBuilder.create()
-        alertDialog.show()
+        // Используем Snackbar для отображения результата
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG).show()
     }
 }
