@@ -19,7 +19,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var prevButton: ImageButton
     private lateinit var questionTextView: TextView
 
-    private var answered = false
     private var correctAnswersCount = 0
 
     private val quizViewModel: QuizViewModel by lazy {
@@ -39,16 +38,14 @@ class MainActivity : AppCompatActivity() {
 
 
         trueButton.setOnClickListener { view: View ->
-            if (!answered) {
-                checkAnswer(true)
-                disableAnswerButtons()
-            }
+            checkAnswer(true)
+            disableAnswerButtons()
+            quizViewModel.currentQuestionAnswered = true
         }
         falseButton.setOnClickListener { view: View ->
-            if (!answered) {
-                checkAnswer(false)
-                disableAnswerButtons()
-            }
+            checkAnswer(false)
+            disableAnswerButtons()
+            quizViewModel.currentQuestionAnswered = true
         }
         nextButton.setOnClickListener {
             quizViewModel.moveToNext()
@@ -86,7 +83,13 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onDestroy() called")
     }
     private fun updateQuestion() {
-        enableAnswerButtons()
+        if (!quizViewModel.currentQuestionAnswered){
+            enableAnswerButtons()
+        }
+        else
+        {
+            disableAnswerButtons()
+        }
         if (quizViewModel.diffBetweenCurQB ) {
             val questionTextResId = quizViewModel.currentQuestionText
             questionTextView.setText(questionTextResId)
@@ -112,12 +115,10 @@ class MainActivity : AppCompatActivity() {
     private fun disableAnswerButtons() {
         trueButton.isEnabled = false
         falseButton.isEnabled = false
-        answered = true
     }
     private fun enableAnswerButtons() {
         trueButton.isEnabled = true
         falseButton.isEnabled = true
-
     }
     private fun showFinalScore() {
         val totalQuestions = quizViewModel.questionBankSize

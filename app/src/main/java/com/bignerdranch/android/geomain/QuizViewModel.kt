@@ -14,6 +14,13 @@ class QuizViewModel : ViewModel() {
         Question(R.string.question_americas, true),
         Question(R.string.question_asia, true)
     )
+    var currentQuestionAnswered: Boolean
+        get() {
+            val answered = questionBank[currentIndex].answered
+            return answered
+        }
+        set(value) { questionBank[currentIndex].answered = value }
+
     val currentQuestionAnswer: Boolean
         get() = questionBank[currentIndex].answer
     val currentQuestionText: Int
