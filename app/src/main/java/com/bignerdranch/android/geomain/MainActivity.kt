@@ -71,17 +71,26 @@ class MainActivity : AppCompatActivity() {
                 nextButton.visibility = View.INVISIBLE
             }
         }
+        var cheatCount = 0
+        val MAX_CHEATS = 3
         cheatButton.setOnClickListener {view ->
         // Начало CheatActivity
-            val answerIsTrue = quizViewModel.currentQuestionAnswer
-            val intent = CheatActivity.newIntent(this@MainActivity, answerIsTrue, quizViewModel)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val options = ActivityOptions.makeClipRevealAnimation(view, 0, 0, view.width, view.height)
-                startActivityForResult(intent, REQUEST_CODE_CHEAT, options.toBundle())
+            if (cheatCount < MAX_CHEATS){
+                val answerIsTrue = quizViewModel.currentQuestionAnswer
+                val intent = CheatActivity.newIntent(this@MainActivity, answerIsTrue, quizViewModel)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    val options = ActivityOptions.makeClipRevealAnimation(view, 0, 0, view.width, view.height)
+                    startActivityForResult(intent, REQUEST_CODE_CHEAT, options.toBundle())
+                }
+                else {
+                    startActivityForResult(intent, REQUEST_CODE_CHEAT)
+                }
+                cheatCount++
             }
-            else {
-                startActivityForResult(intent, REQUEST_CODE_CHEAT)
+            else{
+                Toast.makeText(this,"Подсказки закончены", Toast.LENGTH_SHORT).show()
             }
+
         }
         prevButton.setOnClickListener {
             quizViewModel.moveToBack()

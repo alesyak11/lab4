@@ -8,11 +8,6 @@ class QuizViewModel : ViewModel() {
     var currentIndex = 0
     var isCheater = false
 
-    companion object {
-        private const val MAX_CHEATS = 3
-    }
-    var cheatCount = 0
-
     private val questionBank = listOf(
         Question(R.string.question_australia, true),
         Question(R.string.question_oceans, true),
@@ -45,14 +40,6 @@ class QuizViewModel : ViewModel() {
     val equalCurQB: Boolean
         get() = currentIndex == questionBank.size - 1
 
-    val remainingCheats: Int
-        get() = MAX_CHEATS - cheatCount
 
-    fun incrementCheatCount() {
-        cheatCount++
-    }
-    fun hasRemainingCheats(): Boolean {
-        return cheatCount < MAX_CHEATS
-    }
 
 }

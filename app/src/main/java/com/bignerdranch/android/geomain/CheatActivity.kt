@@ -12,8 +12,6 @@ import com.google.android.material.snackbar.Snackbar
 
 const val EXTRA_ANSWER_SHOWN = "com.bignerdranch.android.geoquiz.answer_shown"
 private const val EXTRA_ANSWER_IS_TRUE = "com.bignerdranch.android.geoquiz.answer_is_true"
-private const val EXTRA_QUIZ_VIEW_MODEL = "com.bignerdranch.android.geoquiz.quizViewModel"
-
 class CheatActivity : AppCompatActivity() {
     private lateinit var answerTextView: TextView
     private lateinit var showAnswerButton: Button
@@ -35,26 +33,17 @@ class CheatActivity : AppCompatActivity() {
                 else -> R.string.false_button
             }
             answerTextView.setText(answerText)
+            //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
             setAnswerShownResult(true)
         }
 
         showAnswerButton.setOnClickListener {
-            if (quizViewModel.hasRemainingCheats()) {
-                val answerText = when {
-                    answerIsTrue -> R.string.true_button
-                    else -> R.string.false_button
-                }
-                answerTextView.setText(answerText)
-                setAnswerShownResult(true)
-                quizViewModel.incrementCheatCount()
-
-                val remainingCheatsMessage = "Осталось подсказок: ${quizViewModel.remainingCheats}"
-                Snackbar.make(findViewById(android.R.id.content), remainingCheatsMessage, Snackbar.LENGTH_SHORT).show()
+            val answerText = when {
+                answerIsTrue -> R.string.true_button
+                else -> R.string.false_button
             }
-            else {
-                val noCheatsMessage = "У вас закончились подсказки."
-                Snackbar.make(findViewById(android.R.id.content), noCheatsMessage, Snackbar.LENGTH_SHORT).show()
-            }
+            answerTextView.setText(answerText)
+            setAnswerShownResult(true)
         }
     }
     private fun setAnswerShownResult(isAnswerShown: Boolean) {
@@ -68,7 +57,6 @@ class CheatActivity : AppCompatActivity() {
         fun newIntent(packageContext: Context, answerIsTrue: Boolean, quizViewModel: QuizViewModel): Intent {
             return Intent(packageContext, CheatActivity::class.java).apply {
                 putExtra(EXTRA_ANSWER_IS_TRUE, answerIsTrue)
-                putExtra(EXTRA_QUIZ_VIEW_MODEL, quizViewModel.cheatCount)
             }
         }
     }
